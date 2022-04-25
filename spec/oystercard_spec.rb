@@ -31,5 +31,28 @@ describe Oystercard do
     end
   end
 
+  describe '#in_journey?' do
+    it { should respond_to(:in_journey?) }
 
+    it 'should return whether the card is in use' do
+      expect(subject.in_journey?).to be(true).or be(false)
+    end
+  end
+
+  describe '#touch_in' do
+    it { should respond_to(:touch_in) }
+
+    it 'should change card to be in use' do
+      expect { subject.touch_in }.to change { subject.in_journey? }.from(false).to(true)
+    end
+  end
+
+  describe '#touch_out' do
+    it { should respond_to(:touch_out) }
+
+    it 'should change card to not be in use' do
+      subject.touch_in
+      expect { subject.touch_out }.to change { subject.in_journey? }.from(true).to(false)
+    end
+  end
 end

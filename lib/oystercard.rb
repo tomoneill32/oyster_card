@@ -4,6 +4,7 @@ class Oystercard
 
   def initialize
     @balance = DEFAULT_VALUE
+    @in_use = false
   end
 
   def top_up(funds)
@@ -15,14 +16,25 @@ class Oystercard
     @balance -= fare
   end
 
-
   def check_balance
     balance
   end
 
+  def in_journey?
+    in_use
+  end
+
+  def touch_in
+    @in_use = true
+  end
+
+  def touch_out
+    @in_use = false
+  end
+
   private
 
-  attr_reader :balance
+  attr_reader :balance, :in_use
 
   def exceeds_max?(funds)
     balance + funds > MAXIMUM_BALANCE
