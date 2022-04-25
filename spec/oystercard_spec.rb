@@ -10,7 +10,7 @@ describe Oystercard do
     end
   end
 
-  describe 'top_up' do
+  describe '#top_up' do
     it 'will increase the balance on the card by the amount specified' do
       expect{ subject.top_up(5) }.to change{ subject.check_balance }.by(5)
     end
@@ -22,7 +22,7 @@ describe Oystercard do
     end
   end
 
-  describe 'deduct' do
+  describe '#deduct' do
     it{ should respond_to(:deduct).with(1) }
 
     it 'Should reduce the balance on the card by the fare' do
@@ -43,14 +43,22 @@ describe Oystercard do
     it { should respond_to(:touch_in) }
 
     it 'should change card to be in use' do
+      top_up_card
       expect { subject.touch_in }.to change { subject.in_journey? }.from(false).to(true)
     end
+
+    it 'should not let you touch in with a balance below £1' do
+      minimum_balance_to_travel = Oystercard::MINIMUM_BALANCE_TO_TRAVEL 
+      expect{subject.touch_in}.to raise_error "Insufficient funds - balance below #{minimum_balance_to_travel}"
+    end
+
   end
 
   describe '#touch_out' do
     it { should respond_to(:touch_out) }
 
     it 'should change card to not be in use' do
+      top_up_card
       subject.touch_in
       expect { subject.touch_out }.to change { subject.in_journey? }.from(true).to(false)
     end
