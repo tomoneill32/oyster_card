@@ -5,6 +5,10 @@ class Oystercard
     @balance = DEFAULT_VALUE
   end
 
+  def top_up(funds)
+    @balance += funds
+  end
+
   def check_balance
     balance
   end
