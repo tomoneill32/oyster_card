@@ -2,6 +2,7 @@ class Oystercard
   DEFAULT_VALUE = 0
   MAXIMUM_BALANCE = 90
   MINIMUM_BALANCE_TO_TRAVEL = 1
+  MINIMUM_FARE = 1
 
   def initialize
     @balance = DEFAULT_VALUE
@@ -11,10 +12,6 @@ class Oystercard
   def top_up(funds)
     fail "Maximum balance #{MAXIMUM_BALANCE} exceeded" if exceeds_max?(funds)
     @balance += funds
-  end
-
-  def deduct(fare)
-    @balance -= fare
   end
 
   def check_balance
@@ -27,16 +24,18 @@ class Oystercard
 
   def touch_in
     fail "Insufficient funds - balance below #{MINIMUM_BALANCE_TO_TRAVEL}" if insufficient_balance?
-    @in_use = true
+    self.in_use=(true)
   end
 
   def touch_out
-    @in_use = false
+    self.in_use=(false)
+    deduct(MINIMUM_FARE)
   end
 
   private
 
-  attr_reader :balance, :in_use
+  attr_reader :balance
+  attr_accessor :in_use
 
   def exceeds_max?(funds)
     balance + funds > MAXIMUM_BALANCE
@@ -44,6 +43,10 @@ class Oystercard
 
   def insufficient_balance?
     check_balance < MINIMUM_BALANCE_TO_TRAVEL
+  end
+
+  def deduct(fare)
+    @balance -= fare
   end
 
 end
