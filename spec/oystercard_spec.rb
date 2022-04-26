@@ -1,6 +1,7 @@
 describe Oystercard do
 
-  let(:station){ double :station}
+  let(:entry_station){ double :station}
+  let(:exit_station){double :station}
 
   def top_up_card
     subject.top_up(20)
@@ -28,39 +29,45 @@ describe Oystercard do
 
     it 'should change card to be in use' do
       top_up_card
-      subject.touch_in(station)
+      subject.touch_in(entry_station)
       expect(subject).to be_in_journey
     end
 
     it 'should not let you touch in with a balance below £1' do
       minimum_balance_to_travel = Oystercard::MINIMUM_BALANCE_TO_TRAVEL 
-      expect{subject.touch_in(station)}.to raise_error "Insufficient funds - balance below #{minimum_balance_to_travel}"
+      expect{subject.touch_in(entry_station)}.to raise_error "Insufficient funds - balance below #{minimum_balance_to_travel}"
     end
 
   end
 
   describe '#touch_out' do
-    it { should respond_to(:touch_out) }
 
     it 'should change card to not be in use' do
       top_up_card
-      subject.touch_in(station)
-      subject.touch_out
+      subject.touch_in(entry_station)
+      subject.touch_out(exit_station)
       expect(subject).not_to be_in_journey
     end
 
     it 'should deduct the minimum fare from the card' do
       top_up_card
-      subject.touch_in(station)
-      expect { subject.touch_out}.to change { subject.check_balance }.by(-Oystercard::MINIMUM_FARE)
+      subject.touch_in(entry_station)
+      expect { subject.touch_out(exit_station)}.to change { subject.check_balance }.by(-Oystercard::MINIMUM_FARE)
     end
     
   end
 
-  it 'stores the entry station' do
-    top_up_card
-    subject.touch_in(station)
-    expect(subject.entry_station).to eq(station)
+  describe '#journey_history' do
+    it 'writes an empty list of journeys by default' do
+      expect(subject.journey_history).to be_empty
+    end  
+
+    it 'returns the list of previous journeys' do
+      top_up_card
+      subject.touch_in(entry_station)
+      subject.touch_out(exit_station)
+      expect(subject.journey_history).to include({entry_station: entry_station, exit_station: exit_station})
+    end
   end
 
 end
