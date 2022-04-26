@@ -1,5 +1,7 @@
 describe Oystercard do
 
+  let(:station){ double :station}
+
   def top_up_card
     subject.top_up(20)
   end
@@ -22,34 +24,17 @@ describe Oystercard do
     end
   end
 
-  # describe '#deduct' do
-  #   it{ should respond_to(:deduct).with(1) }
-
-  #   it 'Should reduce the balance on the card by the fare' do
-  #     top_up_card
-  #     expect{subject.deduct(5)}.to change{ subject.check_balance }.by(-5)
-  #   end
-  # end
-
-  describe '#in_journey?' do
-    it { should respond_to(:in_journey?) }
-
-    it 'should return whether the card is in use' do
-      expect(subject.in_journey?).to be(true).or be(false)
-    end
-  end
-
   describe '#touch_in' do
-    it { should respond_to(:touch_in) }
 
     it 'should change card to be in use' do
       top_up_card
-      expect { subject.touch_in }.to change { subject.in_journey? }.from(false).to(true)
+      subject.touch_in(station)
+      expect(subject).to be_in_journey
     end
 
     it 'should not let you touch in with a balance below £1' do
       minimum_balance_to_travel = Oystercard::MINIMUM_BALANCE_TO_TRAVEL 
-      expect{subject.touch_in}.to raise_error "Insufficient funds - balance below #{minimum_balance_to_travel}"
+      expect{subject.touch_in(station)}.to raise_error "Insufficient funds - balance below #{minimum_balance_to_travel}"
     end
 
   end
@@ -59,15 +44,23 @@ describe Oystercard do
 
     it 'should change card to not be in use' do
       top_up_card
-      subject.touch_in
-      expect { subject.touch_out }.to change { subject.in_journey? }.from(true).to(false)
+      subject.touch_in(station)
+      subject.touch_out
+      expect(subject).not_to be_in_journey
     end
 
     it 'should deduct the minimum fare from the card' do
       top_up_card
-      subject.touch_in
+      subject.touch_in(station)
       expect { subject.touch_out}.to change { subject.check_balance }.by(-Oystercard::MINIMUM_FARE)
     end
     
   end
+
+  it 'stores the entry station' do
+    top_up_card
+    subject.touch_in(station)
+    expect(subject.entry_station).to eq(station)
+  end
+
 end
